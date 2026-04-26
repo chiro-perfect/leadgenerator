@@ -1,10 +1,30 @@
 import streamlit as st
 import pandas as pd
 from duckduckgo_search import DDGS
+import stripe
+
+# --- CONFIGURATION STRIPE ---
+# Ta clé Live pour la vérification réelle
+stripe.api_key = "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"
+
+def verifier_paiement_stripe(checkout_id):
+    """Vérifie si l'ID de session Stripe est valide et payé"""
+    # Sécurité de base sur le format
+    if not checkout_id or not checkout_id.startswith("cs_"):
+        return False
+    try:
+        # On interroge l'API Stripe
+        session = stripe.checkout.Session.retrieve(checkout_id)
+        if session.payment_status == "paid":
+            return True
+        return False
+    except Exception:
+        # En cas d'ID inexistant ou erreur réseau
+        return False
 
 # Configuration de la page
 st.set_page_config(
-    page_title="LeadHunter | Dashboard",
+    page_title="LeadHunter | Dashboard Premium",
     page_icon="🟢",
     layout="wide"
 )
@@ -14,92 +34,57 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Circular:wght@400;700&family=Inter:wght@400;700&display=swap');
 
-    /* Fond principal sombre Spotify */
     .stApp {
         background: linear-gradient(180deg, #121212 0%, #000000 100%);
         color: white;
     }
 
-    /* Sidebar noire */
     section[data-testid="stSidebar"] {
         background-color: #000000 !important;
         border-right: 1px solid #282828;
     }
 
-    /* Titres */
-    h1, h2, h3 {
-        font-family: 'Inter', sans-serif;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
+    .spotify-green { color: #1DB954; }
 
-    /* Le fameux Vert Spotify */
-    .spotify-green {
-        color: #1DB954;
-    }
-
-    /* Bouton principal (Play Style) */
+    /* Boutons et inputs style Spotify */
     .stButton button {
         background-color: #1DB954 !important;
         color: white !important;
-        border-radius: 500px !important; /* Très arrondi comme Spotify */
+        border-radius: 500px !important;
         padding: 12px 35px !important;
         font-weight: 700 !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
         border: none !important;
-        transition: all 0.3s ease;
+        transition: 0.3s;
     }
     
-    .stButton button:hover {
-        background-color: #1ed760 !important;
-        transform: scale(1.05);
-    }
+    .stButton button:hover { transform: scale(1.05); background-color: #1ed760 !important; }
 
-    /* Barre de recherche style Spotify */
     .stTextInput input {
         background-color: #2a2a2a !important;
         color: white !important;
         border-radius: 500px !important;
         border: 1px solid transparent !important;
-        padding: 12px 25px !important;
-    }
-    
-    .stTextInput input:focus {
-        border: 1px solid #ffffff !important;
     }
 
-    /* Cartes de résultats (Album Style) */
     .prospect-card {
         background: #181818;
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 10px;
-        transition: background 0.3s ease;
         border: 1px solid #282828;
     }
     
-    .prospect-card:hover {
-        background: #282828;
-    }
-
-    /* Bouton Stripe Premium */
     .stripe-button {
         display: block;
         background-color: #ffffff;
         color: #000000 !important;
-        padding: 14px;
+        padding: 12px;
         text-align: center;
         border-radius: 500px;
         text-decoration: none;
         font-weight: 700;
-        margin-top: 15px;
-        font-size: 14px;
+        font-size: 13px;
     }
-
-    /* Cacher le menu Streamlit pour plus de pro */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -107,76 +92,67 @@ st.markdown("""
 with st.sidebar:
     st.markdown("<h2 class='spotify-green'>LeadHunter</h2>", unsafe_allow_html=True)
     st.write(" ")
-    st.markdown("🏠 **Accueil**")
-    st.markdown("🔍 **Rechercher**")
-    st.markdown("📚 **Ma Bibliothèque**")
-    st.write("---")
     
-    plan = st.radio("Abonnement actuel", ["Standard", "Premium ✨"])
+    # Gestion du verrouillage Premium
+    st.markdown("🔒 **STATUT DU COMPTE**")
     
-    if plan == "Standard":
+    # On initialise l'état premium
+    if 'premium_active' not in st.session_state:
+        st.session_state.premium_active = False
+
+    user_code = st.text_input("Code Premium (Reçu par mail)", type="password", placeholder="cs_live_...")
+    
+    if user_code:
+        if verifier_paiement_stripe(user_code):
+            st.session_state.premium_active = True
+            st.success("Mode Premium Actif ✅")
+        else:
+            st.session_state.premium_active = False
+            st.error("Code invalide ou expiré")
+
+    if not st.session_state.premium_active:
         st.markdown("""
-            <div style="background:#282828; padding:15px; border-radius:10px;">
-                <p style="font-size:12px; font-weight:700;">DÉBLOQUEZ TOUT</p>
-                <p style="font-size:11px;">Accédez à 50+ prospects et exportez en CSV.</p>
-                <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="stripe-button" target="_blank">PASSER AU PREMIUM</a>
+            <div style="background:#282828; padding:15px; border-radius:10px; margin-top:10px;">
+                <p style="font-size:12px; font-weight:700;">PASSEZ À L'ILLIMITÉ</p>
+                <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="stripe-button" target="_blank">OBTENIR UN CODE</a>
             </div>
         """, unsafe_allow_html=True)
-        limit = 3
-    else:
-        password = st.text_input("Code Premium", type="password", placeholder="Entrez votre code")
-        if password == "LEAD2026":
-            st.success("Mode Premium Actif")
-            limit = 50
-        else:
-            st.error("Code requis")
-            limit = 3
+
+    limit = 50 if st.session_state.premium_active else 3
 
 # --- CONTENU PRINCIPAL ---
 st.markdown("<h1>Rechercher vos <span class='spotify-green'>Leads</span></h1>", unsafe_allow_html=True)
 
-# Barre de recherche type "Spotify Search"
-query = st.text_input("", placeholder="Cherchez une niche (ex: Coach sportif Lyon)", label_visibility="collapsed")
+query = st.text_input("", placeholder="Niche + Ville (ex: Plombier Bordeaux)", label_visibility="collapsed")
 
-if st.button("LANCER LA PLAYLIST"):
+if st.button("GÉNÉRER LA LISTE"):
     if query:
-        with st.spinner('Chargement des meilleurs prospects...'):
+        with st.spinner('Recherche en cours...'):
             try:
                 results = []
                 with DDGS() as ddgs:
-                    search_results = ddgs.text(f"{query} contact business", max_results=limit)
+                    # Recherche optimisée pour trouver des contacts
+                    search_results = ddgs.text(f"{query} contact email business", max_results=limit)
                     for r in search_results:
-                        results.append({
-                            "Nom": r['title'],
-                            "Lien": r['href'],
-                            "Détails": r['body']
-                        })
+                        results.append({"Nom": r['title'], "Lien": r['href'], "Détails": r['body']})
                 
                 if results:
-                    st.write(f"### Résultats pour : {query}")
+                    st.write(f"### {len(results)} Prospects trouvés")
                     for res in results:
                         st.markdown(f"""
                             <div class="prospect-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div>
-                                        <h4 style="margin:0; color:#1DB954;">{res['Nom']}</h4>
-                                        <p style="font-size:13px; color:#b3b3b3; margin:5px 0;">{res['Détails'][:180]}...</p>
-                                    </div>
-                                    <a href="{res['Lien']}" target="_blank" style="color:white; font-size:20px; text-decoration:none;">▶️</a>
-                                </div>
+                                <h4 style="margin:0; color:#1DB954;">{res['Nom']}</h4>
+                                <p style="font-size:13px; color:#b3b3b3;">{res['Détails'][:200]}...</p>
+                                <a href="{res['Lien']}" target="_blank" style="color:white; text-decoration:none;">Lien vers le site 🔗</a>
                             </div>
                         """, unsafe_allow_html=True)
                     
-                    # Action de fin
-                    df = pd.DataFrame(results)
-                    csv = df.to_csv(index=False).encode('utf-8')
-                    st.download_button("📥 TÉLÉCHARGER LA PLAYLIST (CSV)", data=csv, file_name="leads_premium.csv", mime="text/csv")
+                    if st.session_state.premium_active:
+                        csv = pd.DataFrame(results).to_csv(index=False).encode('utf-8')
+                        st.download_button("📥 TÉLÉCHARGER LE CSV", data=csv, file_name="leads_pro.csv", mime="text/csv")
                 else:
-                    st.info("Aucun prospect trouvé dans cette catégorie.")
+                    st.warning("Aucun résultat pour cette recherche.")
             except:
-                st.error("Connexion interrompue. Réessayez.")
+                st.error("Erreur de recherche. Réessayez.")
     else:
-        st.warning("Veuillez entrer un nom de domaine ou une ville.")
-
-# Pied de page
-st.markdown("<br><br><p style='text-align: center; color: #535353; font-size: 11px;'>LeadHunter Premium © 2026</p>", unsafe_allow_html=True)
+        st.info("Entrez une thématique pour commencer.")
