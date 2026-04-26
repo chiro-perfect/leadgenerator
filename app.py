@@ -19,179 +19,126 @@ def verifier_paiement_stripe(checkout_id):
 
 # Configuration de la page
 st.set_page_config(
-    page_title="LeadHunter | Dashboard Pro",
+    page_title="LeadHunter | Dashboard",
     page_icon="🟢",
     layout="wide"
 )
 
-# --- STYLE CSS AVANCÉ (DESIGN SPOTIFY + ANIMATIONS) ---
+# --- STYLE CSS (LE PREMIER STYLE PLUS SOBRE) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Circular:wght@400;700&family=Inter:wght@400;800&display=swap');
-    
-    /* Fond dégradé sombre */
-    .stApp { 
-        background: linear-gradient(180deg, #121212 0%, #000000 100%); 
-        color: white; 
-    }
-    
-    /* Animation de pulsation pour le bouton Premium */
-    @keyframes pulse-green {
-        0% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.7); }
-        70% { box-shadow: 0 0 0 15px rgba(29, 185, 84, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0); }
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Circular:wght@400;700&display=swap');
 
-    /* Le Bouton S'abonner Ultra-Design */
-    .cta-premium {
-        display: block;
-        background-color: #1DB954;
-        color: white !important;
-        padding: 18px 30px;
-        border-radius: 500px;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 18px;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        transition: all 0.4s ease;
-        border: none;
-        animation: pulse-green 2s infinite;
-        margin: 20px 0;
-        width: 100%;
-    }
-    .cta-premium:hover {
-        background-color: #1ed760;
-        transform: scale(1.03);
-        box-shadow: 0 10px 25px rgba(29, 185, 84, 0.5);
-    }
-
-    /* Boîtes d'avantages */
-    .benefit-row {
-        display: flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 12px 20px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        border-left: 4px solid #1DB954;
-        text-align: left;
-    }
-    .benefit-icon { font-size: 20px; margin-right: 15px; }
-
-    /* Typographie Prix */
-    .price-big {
-        font-family: 'Inter', sans-serif;
-        font-size: 48px;
-        font-weight: 800;
+    .stApp {
+        background: linear-gradient(180deg, #121212 0%, #000000 100%);
         color: white;
-        margin: 10px 0;
     }
-    .price-sub { font-size: 16px; color: #b3b3b3; font-weight: 400; }
-    
-    .spotify-green { color: #1DB954; }
-    
-    /* Style de la barre latérale */
+
     section[data-testid="stSidebar"] {
         background-color: #000000 !important;
         border-right: 1px solid #282828;
     }
+
+    .spotify-green { color: #1DB954; }
+
+    .stButton button {
+        background-color: #1DB954 !important;
+        color: white !important;
+        border-radius: 500px !important;
+        padding: 12px 35px !important;
+        font-weight: 700 !important;
+        border: none !important;
+        transition: 0.3s;
+    }
     
-    /* Cartes des résultats de recherche */
+    .stButton button:hover { transform: scale(1.05); background-color: #1ed760 !important; }
+
     .prospect-card {
         background: #181818;
         padding: 20px;
         border-radius: 12px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         border: 1px solid #282828;
-        transition: 0.3s;
     }
-    .prospect-card:hover {
-        background: #282828;
-        border-color: #535353;
+    
+    .stripe-button {
+        display: block;
+        background-color: #ffffff;
+        color: #000000 !important;
+        padding: 12px;
+        text-align: center;
+        border-radius: 500px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 13px;
+        margin-top: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- POP-UP DE VENTE (DIALOG) ---
-@st.dialog("⚡️ DÉBLOQUE LEADHUNTER FULL ACCÈS")
-def premium_modal():
+# --- LE PREMIER POP-UP (RETOUR AUX SOURCES) ---
+@st.dialog("🚀 OFFRE DE LANCEMENT")
+def welcome_modal():
     st.markdown("""
         <div style='text-align:center;'>
-            <p style='color:#1DB954; font-weight:700; letter-spacing:2px; font-size:12px; margin-bottom:5px;'>OFFRE DE LANCEMENT</p>
-            <h1 style='margin-top:0; color:white;'>Prospectez 10x plus vite.</h1>
-            
-            <div style='margin: 25px 0;'>
-                <div class='benefit-row'>
-                    <span class='benefit-icon'>🚀</span>
-                    <span><b>50+ prospects</b> par recherche (vs 3 en gratuit)</span>
-                </div>
-                <div class='benefit-row'>
-                    <span class='benefit-icon'>📥</span>
-                    <span><b>Export CSV Illimité</b> pour Excel et CRM</span>
-                </div>
-                <div class='benefit-row'>
-                    <span class='benefit-icon'>🤖</span>
-                    <span><b>Algorithme IA</b> de recherche profonde</span>
-                </div>
+            <h2 style='color:white;'>Passez à l'illimité</h2>
+            <p style='font-size:16px; color:#b3b3b3;'>Ne vous contentez pas de 3 résultats. Extrayez des listes massives de clients potentiels pour votre business.</p>
+            <div style='background:#1DB95422; padding:20px; border-radius:15px; border:1px solid #1DB954; margin: 20px 0;'>
+                <h3 style='margin:0; color:#1DB954;'>29€ / mois</h3>
+                <ul style='text-align:left; font-size:14px; margin-top:15px; color:white;'>
+                    <li>✅ 50+ prospects par recherche</li>
+                    <li>✅ Export CSV (Excel) en 1 clic</li>
+                    <li>✅ Accès complet aux algorithmes</li>
+                </ul>
             </div>
-
-            <div class='price-big'>29€<span class='price-sub'> / mois</span></div>
-            <p style='color:#b3b3b3; font-size:13px; margin-bottom:20px;'>Annulable à tout moment • Activation instantanée</p>
-            
-            <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="cta-premium" target="_blank">S'ABONNER MAINTENANT</a>
-            
-            <p style='font-size:10px; color:#535353; margin-top:15px;'>Paiement sécurisé crypté par Stripe &copy;</p>
+            <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="stripe-button" target="_blank">OBTENIR UN CODE MAINTENANT</a>
         </div>
     """, unsafe_allow_html=True)
 
-# Affichage automatique une seule fois par session
 if 'popup_shown' not in st.session_state:
-    premium_modal()
+    welcome_modal()
     st.session_state.popup_shown = True
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.markdown("<h2 class='spotify-green' style='font-size:30px;'>LeadHunter</h2>", unsafe_allow_html=True)
-    st.write("---")
+    st.markdown("<h2 class='spotify-green'>LeadHunter</h2>", unsafe_allow_html=True)
+    st.write(" ")
     
     if 'premium_active' not in st.session_state:
         st.session_state.premium_active = False
 
-    user_code = st.text_input("🔑 Code d'activation (reçu par mail)", type="password")
+    user_code = st.text_input("Code Premium (Reçu par mail)", type="password", placeholder="cs_live_...")
     
     if user_code:
-        with st.spinner("Vérification..."):
-            if verifier_paiement_stripe(user_code):
-                st.session_state.premium_active = True
-                st.success("Accès Premium : ACTIF ✅")
-            else:
-                st.error("Code invalide ou expiré")
+        if verifier_paiement_stripe(user_code):
+            st.session_state.premium_active = True
+            st.success("Mode Premium Actif ✅")
+        else:
+            st.error("Code invalide ou expiré")
 
     if not st.session_state.premium_active:
         st.markdown("""
-            <div style="background:#181818; padding:20px; border-radius:15px; border: 1px solid #1DB954; margin-top:20px; text-align:center;">
-                <p style="font-size:10px; font-weight:800; color:#1DB954; letter-spacing:1px; margin-bottom:5px;">MODE LIMITÉ</p>
-                <h3 style="margin:5px 0;">29€ / mois</h3>
-                <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="cta-premium" style="font-size:12px; padding:12px;" target="_blank">PASSER PREMIUM</a>
+            <div style="background:#282828; padding:15px; border-radius:10px; margin-top:10px;">
+                <p style="font-size:12px; font-weight:700; color:white; margin:0;">DÉBLOQUER L'ILLIMITÉ</p>
+                <p style="font-size:11px; color:#b3b3b3;">Accédez à 50 leads et export CSV.</p>
+                <a href="https://buy.stripe.com/00w5kD1JWedb9DId082Ji00" class="stripe-button" target="_blank">PASSER PREMIUM</a>
             </div>
         """, unsafe_allow_html=True)
 
-# --- RECHERCHE ET RÉSULTATS ---
-st.markdown("<h1>Générez vos <span class='spotify-green'>Ventes</span></h1>", unsafe_allow_html=True)
+    limit = 50 if st.session_state.premium_active else 3
 
-query = st.text_input("", placeholder="Niche + Ville (ex: Coach Lyon, Restaurant Paris...)", label_visibility="collapsed")
-limit = 50 if st.session_state.premium_active else 3
+# --- CONTENU PRINCIPAL ---
+st.markdown("<h1>Rechercher vos <span class='spotify-green'>Leads</span></h1>", unsafe_allow_html=True)
 
-if st.button("LANCER L'EXTRACTION"):
+query = st.text_input("", placeholder="Niche + Ville (ex: Plombier Bordeaux)", label_visibility="collapsed")
+
+if st.button("GÉNÉRER LA LISTE"):
     if query:
-        with st.spinner('Extraction des données en cours...'):
+        with st.spinner('Recherche en cours...'):
             try:
                 results = []
                 with DDGS() as ddgs:
-                    # Recherche optimisée pour les contacts business
-                    search_results = ddgs.text(f"{query} contact business", max_results=limit)
+                    search_results = ddgs.text(f"{query} contact email business", max_results=limit)
                     for r in search_results:
                         results.append({"Nom": r['title'], "Lien": r['href'], "Détails": r['body']})
                 
@@ -201,19 +148,19 @@ if st.button("LANCER L'EXTRACTION"):
                         st.markdown(f"""
                             <div class="prospect-card">
                                 <h4 style="margin:0; color:#1DB954;">{res['Nom']}</h4>
-                                <p style="font-size:13px; color:#b3b3b3; margin:8px 0;">{res['Détails'][:250]}...</p>
-                                <a href="{res['Lien']}" target="_blank" style="color:white; font-size:12px; text-decoration:none;">Accéder au site 🔗</a>
+                                <p style="font-size:13px; color:#b3b3b3;">{res['Détails'][:200]}...</p>
+                                <a href="{res['Lien']}" target="_blank" style="color:white; text-decoration:none;">Lien vers le site 🔗</a>
                             </div>
                         """, unsafe_allow_html=True)
                     
                     if st.session_state.premium_active:
                         csv = pd.DataFrame(results).to_csv(index=False).encode('utf-8')
-                        st.download_button("📥 TÉLÉCHARGER LE CSV", data=csv, file_name="leads_premium.csv", mime="text/csv")
+                        st.download_button("📥 TÉLÉCHARGER LE CSV", data=csv, file_name="leads_pro.csv", mime="text/csv")
                     else:
-                        st.info("💡 Vous voyez 3 résultats. Débloquez les 50 suivants et l'export CSV en passant Premium.")
+                        st.warning("💡 Limite gratuite de 3 résultats. Passez Premium pour voir 50 résultats et télécharger le fichier CSV.")
                 else:
-                    st.warning("Aucun résultat trouvé pour cette recherche.")
-            except Exception:
-                st.error("Erreur de connexion aux serveurs de recherche. Veuillez réessayer.")
+                    st.warning("Aucun résultat pour cette recherche.")
+            except:
+                st.error("Erreur de recherche. Réessayez.")
     else:
-        st.warning("Entrez un mot-clé pour commencer.")
+        st.info("Entrez une thématique pour commencer.")
