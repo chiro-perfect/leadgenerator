@@ -4,7 +4,7 @@ from duckduckgo_search import DDGS
 
 # Configuration de la page
 st.set_page_config(
-    page_title="LeadHunter | Premium Dashboard",
+    page_title="LeadHunter | Dashboard",
     page_icon="🟢",
     layout="wide"
 )
